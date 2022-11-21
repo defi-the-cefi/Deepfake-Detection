@@ -8,13 +8,18 @@ DeepFake Detection
   * [References](#references)
 
 
-### Overview
-The following is the completed Take Home exercises for Reality Defender Data Engineer.
+### Intro
+
+The following is the completed Take Home exercises for Reality Defender Data Engineer. Finetuned a pre-trained EfficientNet classification algorithm to learn to do DeepFake classification. Leveraged samples from mp4 from DeepFake MNIST+ dataset to transfer learn with our model. 
+
+Really fascinating stuff. Really difficult take-home. Enjoyed the challenge.
 
 
 ### Requirements
-
   * Pytorch
+  * Pandas
+  * Numpy
+  * Matplotlib
   * CUDA 10+ highly recommended
 
 ### Usage
@@ -40,3 +45,5 @@ The following is the completed Take Home exercises for Reality Defender Data Eng
   cd deepfake_detection
   python -i efficient_net_b7.py
   ```
+
+  * after training is complete
