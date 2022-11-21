@@ -1,7 +1,7 @@
 #%%
 import torch
-
-# deepfake_detection.training
+import os
+import pandas as pd
 from dataset_object import images_dataset, train_frame, val_frame, test_frame
 from torch.utils.data import DataLoader
 from torchvision.models import efficientnet_b7
@@ -13,16 +13,16 @@ from training import Optimization
 #%% Model Hyperparameter
 # Device configuration
 num_of_gpus = torch.cuda.device_count()
-print(num_of_gpus)
-device = torch.device('cuda:0') # if torch.cuda.is_available() else torch.device('cpu')
+print('number of gpus avail: ', num_of_gpus)
+device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 model_name = 'Effnet'
 # Hyper-parameters
-num_epochs = 500
+num_epochs = 50
+# this is largest batch we can fit in 24gb, have not memory profiled this adequately yet
 batch_size = 5
-shuffle_batches = False
-dropout_prob = 0.2
-learning_rate = .25
-weight_decay = 1e-2
+dropout_prob = 0.2 # only tried the default LR, should def tune this hyperparam
+learning_rate = .005
+weight_decay = 1e-4
 print('defined all hyperparams')
 
 #%%
@@ -75,6 +75,33 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, fa
 # try with Cosine Annealing LR
 # torch.optim.lr_scheduler.CosineAnnealingLR
 
-opt = Optimization(model=model, model_name=model_name, loss_fn=criterion, optimizer=optimizer, device=device)
+# Instatiate Optimization Ruitine
+opt = Optimization(model=model, model_name=model_name, loss_fn=criterion, optimizer=optimizer, device=device, scheduler=scheduler)
 
+# train
 opt.train(train_loader, val_loader, batch_size=batch_size, n_epochs=num_epochs)
+
+
+
+#%%  TESTING ON RD's shared dataset
+# RD test dataset
+rd_images_path = os.path.join('dataset', 'rd_test_dataset')
+rd_images_list = os.listdir(rd_images_path)
+rd_frame = pd.DataFrame(rd_images_list, columns=['file_name'])
+print(rd_frame)
+rd_frame['dir_path'] = rd_images_path
+rd_frame['file_path'] = rd_frame.apply(lambda x: os.path.join(x['dir_path'],x['file_name']), axis=1)
+rd_frame['class'] = rd_frame.apply(lambda x: [1,0], axis = 1)
+print(rd_frame)
+
+rd_images = images_dataset(dataset_spec_frame=rd_frame)
+rd_loader = DataLoader(rd_images, batch_size=1, shuffle=False)
+
+#%%
+model.eval()
+rd_results = {}
+for i in range(len(rd_loader)):
+    inference = opt.evaluate(rd_loader, batch_size=1)
+    rd_results[rd_frame['file_name'].value()] = inference
+framed_results = pd.DataFrame(rd_results, columns=['inference_on_rd'])
+
