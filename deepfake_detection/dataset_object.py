@@ -23,8 +23,8 @@ from torchvision.utils import save_image
 
 #%%
 # image file paths
-real_images_path = os.path.join('deepfake_detection', 'dataset', 'real')
-fake_images_path = os.path.join('deepfake_detection', 'dataset', 'fake')
+real_images_path = os.path.join('dataset', 'real')
+fake_images_path = os.path.join('dataset', 'fake')
 
 # list of all files in above paths
 real_images_list = os.listdir(real_images_path)
@@ -99,11 +99,6 @@ class images_dataset(Dataset):
 # train_images = images_dataset(dataset_spec_frame=train_frame)
 # train_loader = DataLoader(train_images, batch_size=1, shuffle=True)
 # print(train_images[0])
-
-
-
-
-
 
 
 
