@@ -12,7 +12,7 @@ from deepfake_detection.training import Optimization
 
 #%% Model Hyperparameter
 # Device configuration
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+device = torch.device('cuda1') if torch.cuda.is_available() else torch.device('cpu')
 model_name = 'Effnet'
 # Hyper-parameters
 num_epochs = 500
