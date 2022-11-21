@@ -14,6 +14,7 @@ https://github.com/huangjiadidi/DeepFakeMnist
 Facial Landmark annotations, pose estimation, person ID
  
 * Explain a simple method to sample a uniform dataset in the i.i.d sense, given the labels.
+
 Using sklearn.model_selection.train_test_split one can evenly partition a dataset across desired label (using "stratify" parameter), and in the proportion we would like (using the "test_size" paramter). In our case we used this method in the creation of our dataloader in dataset_object.py
 
 
