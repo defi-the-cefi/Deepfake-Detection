@@ -200,10 +200,3 @@ print('finished Optimization Class definitions')
 
 
 
-
-
-
-
-
-
-
