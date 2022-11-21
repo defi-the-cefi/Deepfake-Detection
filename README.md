@@ -15,7 +15,7 @@ The following is the completed Take Home exercises for Reality Defender Data Eng
 ### Requirements
 
   * Pytorch
-  * CUDA 10+ highly recommended)
+  * CUDA 10+ highly recommended
 
 ### Usage
 
@@ -23,13 +23,20 @@ The following is the completed Take Home exercises for Reality Defender Data Eng
 
   * cd into repo directory
 
+  ```
+  cd RD-Data-Takehome-Anthony-Zelaya
+  ```
+  
   * create conda env
 
   ```
   conda env create -f env.yml
   ```
 
-  * unzip images for classification to ./deepfake_detection/dataset folder such that their are 2 subdirectories "real" and "fake"
+  * unzip images for classification to ./deepfake_detection/dataset folder such that there are 2 subdirectories "real" and "fake"
+  
+  * cd into run efficient_net_b7.py
   ```
-  cp /image/source/path ./images
+  cd deepfake_detection
+  python -i efficient_net_b7.py
   ```
