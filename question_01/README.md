@@ -1,4 +1,4 @@
-**1. Design & build a small dataset (about 100+ images) to differentiate between real and fake face images. Please explain:
+## 1. Design & build a small dataset (about 100+ images) to differentiate between real and fake face images. Please explain:
 
 * a. Considerations that went into deciding what data to collect.
 
