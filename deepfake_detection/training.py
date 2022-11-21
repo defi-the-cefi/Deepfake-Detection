@@ -23,17 +23,22 @@ class Optimization:
         # Makes predictions
         # expect tensor x of shape (batch, seq_len, features)
         yhat = self.model(x)
-        print('y "truth" shape : ', y.shape)
+        print('yhat: ', torch.nn.functional.softmax(yhat))
         print('yhat shape: ', yhat.shape)
+        print('y_truth', y.float())
+        print('y "truth" shape : ', y.shape)
+
 
         # Computes loss
         loss = self.loss_fn(y.float(), yhat)
+        print('train step loss: ', loss)
+        print('yhat-y_true: ', torch.nn.functional.softmax(yhat)-y.float())
 
         # Computes gradients
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+        #torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
         avg_step_gradients = {}
-        for name, weights in model.named_parameters():
+        for name, weights in self.model.named_parameters():
             avg_step_gradients[name]=weights.grad.abs().mean()
         self.saved_grads.append(avg_step_gradients)
 
@@ -50,7 +55,7 @@ class Optimization:
 
     def train(self, train_loader, val_loader, batch_size=64, n_epochs=50, n_features=1):
         print('training started')
-        save_folder = r'./' + f'{datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")}'
+        save_folder = f'{datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")}'
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
         # TODO start saving to path dictated by file name os.path.basename(__file__)
@@ -188,7 +193,11 @@ class Optimization:
         plt.show()
         plt.close()
 
-print('finished Model and Optimization Class definitions')
+print('Optimization Class definitions')
+
+
+
+
 
 
 
