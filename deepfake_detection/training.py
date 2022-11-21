@@ -1,7 +1,7 @@
 import torch
 from datetime import datetime
 import os
-
+import pandas as pd
 
 class Optimization:
     def __init__(self, model, model_name, loss_fn, optimizer, device):
@@ -33,6 +33,7 @@ class Optimization:
         loss = self.loss_fn(y.float(), yhat)
         print('train step loss: ', loss)
         print('yhat-y_true: ', torch.nn.functional.softmax(yhat)-y.float())
+        print('average batch loss: ', torch.nn.functional.softmax(yhat)-y.float().mean())
 
         # Computes gradients
         loss.backward()
@@ -193,7 +194,7 @@ class Optimization:
         plt.show()
         plt.close()
 
-print('Optimization Class definitions')
+print('finished Optimization Class definitions')
 
 
 
