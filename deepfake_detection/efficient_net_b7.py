@@ -1,33 +1,34 @@
 #%%
 import torch
 
-import deepfake_detection.training
+# deepfake_detection.training
 from dataset_object import images_dataset, train_frame, val_frame, test_frame
 from torch.utils.data import DataLoader
 from torchvision.models import efficientnet_b7
 from torchvision.models import EfficientNet_B7_Weights
-from raining import Optimization
+from training import Optimization
 
 # changed num classes to 2
 
 #%% Model Hyperparameter
 # Device configuration
-device = torch.device('cuda1') if torch.cuda.is_available() else torch.device('cpu')
+num_of_gpus = torch.cuda.device_count()
+print(num_of_gpus)
+device = torch.device('cuda:0') # if torch.cuda.is_available() else torch.device('cpu')
 model_name = 'Effnet'
 # Hyper-parameters
 num_epochs = 500
-batch_size = 200
+batch_size = 5
 shuffle_batches = False
-dropout_prob = 0.3
-learning_rate = .1
-weight_decay = 1e-8
+dropout_prob = 0.2
+learning_rate = .25
+weight_decay = 1e-2
 print('defined all hyperparams')
 
 #%%
 # Dataset Generation
 train_images = images_dataset(dataset_spec_frame=train_frame)
 train_loader = DataLoader(train_images, batch_size=batch_size, shuffle=True)
-print(train_images[0])
 
 val_images = images_dataset(dataset_spec_frame=val_frame)
 val_loader = DataLoader(val_images, batch_size=batch_size, shuffle=True)
@@ -40,13 +41,13 @@ print('generated required datasets')
 #%% Model Specification
 model = efficientnet_b7(weights= EfficientNet_B7_Weights.DEFAULT, progress= True).to(device)
 print(model)
-model.classifier = torch.nn.Linear(2560, 2, bias=True)
+model.classifier = torch.nn.Linear(2560, 2, bias=False).to(device)
 print(model)
 print('defined model specs')
 #%% Print Summary of Arch
-for name, param in model.named_parameters():
-    if param.requires_grad:
-        print (name, param.data)
+# for name, param in model.named_parameters():
+#     if param.requires_grad:
+#         print (name, param.data)
 
 
 #%% Model training specs
