@@ -2,9 +2,11 @@ import torch
 from datetime import datetime
 import os
 import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
 
 class Optimization:
-    def __init__(self, model, model_name, loss_fn, optimizer, device):
+    def __init__(self, model, model_name, loss_fn, optimizer, device, scheduler):
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -14,6 +16,7 @@ class Optimization:
         self.model_name = model_name
         self.saved_grads = []
         self.device = device
+        self.scheduler = scheduler
         print('initialized optimization process')
 
     def train_step(self, x, y):
@@ -105,7 +108,7 @@ class Optimization:
 
             #EARLY STOPPING check
             # criteria: 2*scheduler.patience epochs with no validator error improvements
-            stalled_plateau_gaps = scheduler.patience+1
+            stalled_plateau_gaps = self.scheduler.patience+1
             # start by verifying to we've trained for a min # of epochs
             if len(self.val_losses) >= (2 * stalled_plateau_gaps+1):
                 # check if our scheduler step function just updated our learning rate
@@ -163,8 +166,8 @@ class Optimization:
                 print('test shapes x,y', x_test.shape, y_test.shape)
                 values.append(y_test.numpy())
                 self.model.eval()
-                yhat = self.model(x_test.to(device))
-                test_batch_loss = self.loss_fn(y_test.to(device).float(), yhat).item()
+                yhat = self.model(x_test.to(self.device))
+                test_batch_loss = self.loss_fn(y_test.to(self.device).float(), yhat).item()
                 test_batch_losses.append(test_batch_loss)
                 predictions.append(yhat.detach().cpu().numpy())
                 # values.append(y_test.detach().cpu().numpy())
