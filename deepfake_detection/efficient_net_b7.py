@@ -2,11 +2,11 @@
 import torch
 
 import deepfake_detection.training
-from deepfake_detection.dataset_object import images_dataset, train_frame, val_frame, test_frame
+from dataset_object import images_dataset, train_frame, val_frame, test_frame
 from torch.utils.data import DataLoader
 from torchvision.models import efficientnet_b7
 from torchvision.models import EfficientNet_B7_Weights
-from deepfake_detection.training import Optimization
+from raining import Optimization
 
 # changed num classes to 2
 
