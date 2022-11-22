@@ -40,7 +40,7 @@ Really fascinating stuff. Really difficult take-home. Enjoyed the challenge.
 
   * unzip images for classification to ./deepfake_detection/dataset folder such that there are 2 subdirectories "real" and "fake"
   
-  * cd into run efficient_net_b7.py
+  * cd into deep fake and run efficient_net_b7.py
   ```
   cd deepfake_detection
   python -i efficient_net_b7.py
