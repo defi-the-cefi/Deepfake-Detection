@@ -20,12 +20,10 @@ class Optimization:
         print('initialized optimization process')
 
     def train_step(self, x, y):
-        # Sets model to train mode
-        self.model.train()
-
         # Makes predictions
         # expect tensor x of shape (batch, seq_len, features)
         yhat = self.model(x)
+        print('computed estimate of our target')
         print('yhat: ', torch.nn.functional.softmax(yhat))
         print('yhat shape: ', yhat.shape)
         print('y_truth', y.float())
@@ -45,8 +43,6 @@ class Optimization:
             avg_step_gradients[name]=weights.grad.abs().mean()
         self.saved_grads.append(avg_step_gradients)
 
-
-
         print('backpropogating loss')
         # Updates parameters and zeroes gradients
         self.optimizer.step()
@@ -57,6 +53,8 @@ class Optimization:
         return loss.item()
 
     def train(self, train_loader, val_loader, batch_size=64, n_epochs=50, n_features=1):
+        # Sets model to train mode
+        self.model.train()
         print('training started')
         save_folder = f'{datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")}'
         if not os.path.exists(save_folder):
@@ -70,7 +68,10 @@ class Optimization:
             for x_batch, y_batch in train_loader:
                 print(len(x_batch))
                 print('batch size: ', batch_size)
-                loss = self.train_step(x_batch.to(self.device), y_batch.to(self.device))
+                x_batch = x_batch.to(self.device)
+                print('comfirm input batch is on gpu device: ', x_batch.get_device())
+                y_batch = y_batch.to(self.device)
+                loss = self.train_step(x_batch, y_batch)
                 batch_losses.append(loss)
                 print('current batch loss: ', loss)
                 print('finished process ', len(batch_losses), 'th batch of epoch: ', epoch)
@@ -104,9 +105,9 @@ class Optimization:
             self.learning_rates.append(self.optimizer.param_groups[0]["lr"])
             print('learning rates hist', self.learning_rates)
             # Learning Rate scheduler update
-            scheduler.step(val_loss)
+            self.scheduler.step(val_loss)
 
-            #EARLY STOPPING check
+    #EARLY STOPPING check
             # criteria: 2*scheduler.patience epochs with no validator error improvements
             stalled_plateau_gaps = self.scheduler.patience+1
             # start by verifying to we've trained for a min # of epochs
@@ -197,6 +198,7 @@ class Optimization:
         plt.close()
 
 print('finished Optimization Class definitions')
+
 
 
 
