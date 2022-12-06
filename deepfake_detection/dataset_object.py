@@ -53,7 +53,9 @@ all_images_frame = pd.concat([real_frame,fake_frame], axis=0, ignore_index=True)
 print(all_images_frame)
 
 #%% create train, val, test sets
+# split dataset into 7:3, train:(test+validation) split with equal distributions of fake real samples
 train_frame, test_frame_placeholder = train_test_split(all_images_frame, test_size=.3, stratify=all_images_frame['class'])
+# split (test+validation) into 50:50 train:validation datasets with equal distribution of fake real samples
 val_frame, test_frame = train_test_split(test_frame_placeholder, test_size=.5, stratify=test_frame_placeholder['class'])
 print('train frame size: ', len(train_frame))
 print('validation frame size: ',len(val_frame))
@@ -62,7 +64,7 @@ print('validation frame size: ',len(val_frame))
 #%% Create our torch.Dataset class instance
 class images_dataset(Dataset):
     """laod image dataset."""
-    def __init__(self, dataset_spec_frame, min_image_size= 600, transform=True):
+    def __init__(self, dataset_spec_frame, min_image_size, transform=True):
         """
             dataset_spec_frame (pd.DataFrame): Frame with image path and metadata.
             transform (bool): applies image transformations
@@ -99,6 +101,10 @@ class images_dataset(Dataset):
 # train_images = images_dataset(dataset_spec_frame=train_frame)
 # train_loader = DataLoader(train_images, batch_size=1, shuffle=True)
 # print(train_images[0])
+
+
+
+
 
 
 
