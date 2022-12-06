@@ -25,80 +25,97 @@
 
 #%%
 import torch
-from deepfake_detection.dataset_object import images_dataset, train_frame, val_frame, test_frame
+from dataset_object import images_dataset, train_frame, val_frame, test_frame
 from torch.utils.data import DataLoader
 from torchvision.models import efficientnet_v2_s as architecture
 from torchvision.models import EfficientNet_V2_S_Weights as pretrained_weights
 # for v2_s might ave to use weights.IMAGENET1K_V1
-from deepfake_detection.training import Optimization
+from training import Optimization
 
-# changed num classes to 2
+min_image_size = 384
+dataloader_workers = 32
 
-
-#%% Model Hyperparameter
+# %% Model Hyperparameter
 # Device configuration
 device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 model_name = 'Effnet'
 # Hyper-parameters
-num_epochs = 500
-batch_size = 200
+num_epochs = 50
+batch_size = 50
 shuffle_batches = False
-dropout_prob = 0.3
-learning_rate = .1
+# dropout = 0.3
+learning_rate = 1e-5
 weight_decay = 1e-8
 print('defined all hyperparams')
 
-#%%
-# Dataset Generation
-train_images = images_dataset(dataset_spec_frame=train_frame)
-train_loader = DataLoader(train_images, batch_size=batch_size, shuffle=True)
-print(train_images[0])
+# changed num classes to 2 (real [1,0] or fake [0,1])
 
-val_images = images_dataset(dataset_spec_frame=val_frame)
-val_loader = DataLoader(val_images, batch_size=batch_size, shuffle=True)
-
-test_images = images_dataset(dataset_spec_frame=test_frame)
-test_loader = DataLoader(test_images, batch_size=batch_size, shuffle=True)
-print('generated required datasets')
-
-
-#%% Model Specification
-model = architecture(weights= pretrained_weights.DEFAULT, progress= True).to(device)
-print(model)
-model.classifier = torch.nn.Linear(2560, 2, bias=True)
-print(model)
-print('defined model specs')
 #%% Print Summary of Arch
-for name, param in model.named_parameters():
-    if param.requires_grad:
-        print (name, param.data)
+# for name, param in model.named_parameters():
+#     if param.requires_grad:
+#         print (name, param.data)
+
+#%%
+# no_grad = []
+# tensor_device = []
+# for name, param in model.named_parameters():
+#     if not param.requires_grad:
+#         no_grad.append(name)
+#     tensor_device.append(param.data.device)
+# print(tensor_device)
+# print('tensors with no grad: ', sum(no_grad))
+
 
 
 #%% Model training specs
-criterion = torch.nn.CrossEntropyLoss()
 
-# Adam
-# https://arxiv.org/abs/1412.6980
-# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-# optimal ADAM parameters: Good default settings for the tested machine learning problems are stepsize "lr" = 0.001,
-#  Exponential decay rates for the moment estimates "betas" β1 = 0.9, β2 = 0.999 and
-#  epsilon decay rate "eps" = 10−8
 
-# AdamW decouple weight decay regularization improving upon standard Adam
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-# https://arxiv.org/abs/1711.05101
+def main():
+    # %%
+    # Dataset Generation
+    train_images = images_dataset(dataset_spec_frame=train_frame, min_image_size=min_image_size)
+    train_loader = DataLoader(train_images, batch_size=batch_size, shuffle=True, num_workers=dataloader_workers)
+    print(train_images[0])
 
-#optimizer = torch.optim.LBFGS(model.parameters(), lr=0.08)
-# An LBFGS solver is a quasi-Newton method which uses the inverse of the Hessian to estimate the curvature of the
-# parameter space. In sequential problems, the parameter space is characterised by an abundance of long,
-# flat valleys, which means that the LBFGS algorithm often outperforms other methods such as Adam, particularly when
-# there is not a huge amount of data.
+    val_images = images_dataset(dataset_spec_frame=val_frame, min_image_size=min_image_size)
+    val_loader = DataLoader(val_images, batch_size=batch_size, shuffle=True, num_workers=dataloader_workers)
 
-# Learning Rate Scheduler
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5,  verbose=True)
-# try with Cosine Annealing LR
-# torch.optim.lr_scheduler.CosineAnnealingLR
+    test_images = images_dataset(dataset_spec_frame=test_frame, min_image_size=min_image_size)
+    test_loader = DataLoader(test_images, batch_size=batch_size, shuffle=True, num_workers=dataloader_workers)
+    print('generated required datasets')
 
-opt = Optimization(model=model, model_name=model_name, loss_fn=criterion, optimizer=optimizer, device=device)
+    # %% Model Specification
+    model = architecture(weights=pretrained_weights.DEFAULT, progress=True)
+    print(model)
 
-opt.train(train_loader, val_loader, batch_size=batch_size, n_epochs=num_epochs)
+    # for efficientnet_v2_s, last_channel = None, which means lastconv_output_channels = 4*last_conv)input_channels
+
+    print(model.classifier)
+    print('above is our original classifier layer')
+    model.classifier[1] = torch.nn.Linear(in_features=1280, out_features=2, bias=True)
+    print(model.classifier)
+    print('above is our modded classifier layer')
+    model = model.to(device)
+    print('sent to gpu')
+    print('finished defining model specs')
+    # Cross Entropy Loss Function
+    criterion = torch.nn.CrossEntropyLoss()
+    # Adam
+    # https://arxiv.org/abs/1412.6980
+    # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    # optimal ADAM parameters: Good default settings for the tested machine learning problems are stepsize "lr" = 0.001,
+    #  Exponential decay rates for the moment estimates "betas" β1 = 0.9, β2 = 0.999 and
+    #  epsilon decay rate "eps" = 10−8
+    # AdamW decouple weight decay regularization improving upon standard Adam
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    # https://arxiv.org/abs/1711.05101
+
+    # Learning Rate Scheduler
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5, verbose=True)
+    # Cosine Annealing LR
+    # torch.optim.lr_scheduler.CosineAnnealingLR
+    opt = Optimization(model=model, model_name=model_name, loss_fn=criterion, optimizer=optimizer, device=device, scheduler=scheduler)
+    opt.train(train_loader, val_loader, batch_size=batch_size, n_epochs=num_epochs)
+
+if __name__ == '__main__':
+    main()
