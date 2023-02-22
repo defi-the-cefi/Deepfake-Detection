@@ -1,5 +1,4 @@
-## RD-Data-Takehome-Anthony-Zelaya
-DeepFake Detection
+## DeepFake Detection
 
 ## Overview
   * [Intro](#intro)
@@ -10,9 +9,7 @@ DeepFake Detection
 
 ### Intro
 
-The following is the completed Take Home exercises for Reality Defender Data Engineer. Finetuned a pre-trained EfficientNet classification algorithm to learn to do DeepFake classification. Leveraged samples from mp4 from DeepFake MNIST+ dataset to transfer learn with our model. 
-
-Really fascinating stuff. Really difficult take-home. Enjoyed the challenge.
+The following is repo is a finetuning of a pre-trained EfficientNetv2 classification algorithm to learn to do DeepFake classification. Leveraged samples from mp4 from DeepFake MNIST+ dataset to transfer learn with our model. 
 
 
 ### Requirements
@@ -29,7 +26,7 @@ Really fascinating stuff. Really difficult take-home. Enjoyed the challenge.
   * cd into repo directory
 
   ```
-  cd RD-Data-Takehome-Anthony-Zelaya
+  cd DeepFake Detection
   ```
   
   * create conda env
@@ -47,3 +44,4 @@ Really fascinating stuff. Really difficult take-home. Enjoyed the challenge.
   ```
 
   * after training is complete
+
